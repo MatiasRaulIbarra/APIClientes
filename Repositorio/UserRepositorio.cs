@@ -18,12 +18,24 @@ namespace APIClientes.Repositorio
         }
 
 
-        public Task<string> Login(string userName, string password)
+        public async  Task<string> Login(string userName, string password)
         {
-            throw new NotImplementedException();
+            var user = await _db.Users.FirstOrDefaultAsync(x => x.UserName.ToLower().Equals(userName.ToLower()));
+            if (user == null)
+            {
+                return "nouser";
+            }
+            else if (!VerificarPasswordHash(password, user.PasswordHash, user.PasswordSalt))
+            {
+                return "wrongpassword";
+            }
+            else
+            {
+                return "Ok";
+            }
         }
 
-        public async  Task<int> Register(User user, string password)
+        public async Task<int> Register(User user, string password)
         {
             try
             {
@@ -58,10 +70,28 @@ namespace APIClientes.Repositorio
 
         private void CrearPasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
-            using ( var hmac  = new System.Security.Cryptography.HMACSHA512())
+            using (var hmac = new System.Security.Cryptography.HMACSHA512())
             {
                 passwordSalt = hmac.Key;
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            }
+        }
+
+
+        public bool VerificarPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
+        {
+            using (var hmac = new System.Security.Cryptography.HMACSHA512(passwordSalt))
+            {
+                var computerHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+
+                for (int i = 0; i < computerHash.Length; i++)
+                {
+                    if (computerHash[i] != passwordHash[i])
+                    {
+                        return false;
+                    }
+                }
+                return true;
             }
         }
     }
