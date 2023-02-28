@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using APIClientes.Modelos;
 using APIClientes.Modelos.Dto;
 using APIClientes.Repositorio;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,6 +13,7 @@ namespace APIClientes.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ClientesController : ControllerBase
     {
         private readonly IClienteRepositorio _clienteRepositorio;

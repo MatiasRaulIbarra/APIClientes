@@ -1,9 +1,13 @@
 ﻿using APIClientes.Data;
 using APIClientes.Modelos;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace APIClientes.Repositorio
@@ -11,10 +15,12 @@ namespace APIClientes.Repositorio
     public class UserRepositorio : IUserRepositorio
     {
         private readonly ApplicationDbContext _db;
+        private readonly IConfiguration _configuration;
 
-        public UserRepositorio(ApplicationDbContext db)
+        public UserRepositorio(ApplicationDbContext db, IConfiguration configuration)
         {
             _db = db;
+            _configuration = configuration;
         }
 
 
@@ -31,7 +37,7 @@ namespace APIClientes.Repositorio
             }
             else
             {
-                return "Ok";
+                return CrearToken(user);
             }
         }
 
@@ -93,6 +99,32 @@ namespace APIClientes.Repositorio
                 }
                 return true;
             }
+        }
+
+        private  string  CrearToken(User user)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.UserName)
+            };
+
+            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_configuration.GetSection("AppSetting:Token").Value));
+
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = System.DateTime.Now.AddDays(1),
+                SigningCredentials = creds
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return tokenHandler.WriteToken(token);
+
         }
     }
 }

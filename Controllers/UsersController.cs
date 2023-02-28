@@ -70,8 +70,9 @@ namespace APIClientes.Controllers
                 _response.DisplayMessage = "Password Incorrecta";
                 return BadRequest(_response);
             }
-
-            return Ok("Usuario Conectado");
+            _response.Result = respuesta;
+            _response.DisplayMessage = "Usuario Conectado";
+            return Ok(_response);
         }
     }
 }
