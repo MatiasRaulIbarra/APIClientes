@@ -53,6 +53,7 @@ namespace APIClientes
             services.AddControllers();
 
             services.AddScoped<IClienteRepositorio, ClienteRepositorio>();
+            services.AddScoped<IUserRepositorio, UserRepositorio>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
