@@ -107,7 +107,7 @@ namespace APIClientes.Controllers
                 if (estaEliminado)
                 {
                     _response.Result = estaEliminado;
-                    _response.DisplayMessage = "Cliente eliminado con exito";
+                    _response.DisplayMessage = "Cliente eliminado con Exito";
                     return Ok(_response);
                 }
                 else
